@@ -18,14 +18,17 @@ const char *state2str(VAD_STATE st);
    (counts, thresholds, etc.) */
 
 
+
 typedef struct {
     VAD_STATE state;
     float sampling_rate;
     unsigned int frame_length;
     float last_feature;
-
     unsigned int silence_count;
+
+    float noise_power;
 } VAD_DATA;
+
 
 
 /* Call this function before using VAD: 

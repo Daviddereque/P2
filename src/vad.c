@@ -57,6 +57,7 @@ VAD_DATA * vad_open(float rate) {
   vad_data->sampling_rate = rate;
   vad_data->frame_length = rate * FRAME_TIME * 1e-3;
   vad_data->silence_count = 0;
+  vad_data->noise_power = -60.0f;
   return vad_data;
 }
 
@@ -92,14 +93,22 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, float llindar) {
   Features f = compute_features(x, vad_data->frame_length);
   vad_data->last_feature = f.p; /* save feature, in case you want to show */
 
+  if (vad_data->state == ST_SILENCE &&
+    isfinite(f.p) &&
+    f.p < llindar) {
+
+    vad_data->noise_power =
+        0.95f * vad_data->noise_power + 0.05f * f.p;
+}
+float adaptive_threshold = vad_data->noise_power + 15.0f;
   switch (vad_data->state) {
   case ST_INIT:
     vad_data->state = ST_SILENCE;
     break;
 
   case ST_SILENCE:
-    if (f.p > llindar)
-      vad_data->state = ST_VOICE;
+    if (f.p > adaptive_threshold)
+        vad_data->state = ST_VOICE;
     break;
 
 
