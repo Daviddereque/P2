@@ -56,6 +56,7 @@ VAD_DATA * vad_open(float rate) {
   vad_data->state = ST_INIT;
   vad_data->sampling_rate = rate;
   vad_data->frame_length = rate * FRAME_TIME * 1e-3;
+  vad_data->silence_count = 0;
   return vad_data;
 }
 
@@ -98,10 +99,20 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, float llindar) {
       vad_data->state = ST_VOICE;
     break;
 
-  case ST_VOICE:
-    if (f.p < llindar)
-      vad_data->state = ST_SILENCE;
+
+case ST_VOICE:
+    if (f.p < llindar) {
+        vad_data->silence_count++;
+        
+        if (vad_data->silence_count >= 5) {
+            vad_data->state = ST_SILENCE;
+            vad_data->silence_count = 0;
+        }
+    } else {
+        vad_data->silence_count = 0;
+    }
     break;
+
 
   case ST_UNDEF:
     break;

@@ -11,12 +11,16 @@ const char *state2str(VAD_STATE st);
 /* TODO: add the variables needed to control the VAD 
    (counts, thresholds, etc.) */
 
+
 typedef struct {
-  VAD_STATE state;
-  float sampling_rate;
-  unsigned int frame_length;
-  float last_feature; /* for debuggin purposes */
+    VAD_STATE state;
+    float sampling_rate;
+    unsigned int frame_length;
+    float last_feature;
+
+    unsigned int silence_count;
 } VAD_DATA;
+
 
 /* Call this function before using VAD: 
    It should return allocated and initialized values of vad_data
