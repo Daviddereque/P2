@@ -14,7 +14,7 @@ const float FRAME_TIME = 10.0F; /* in ms. */
  */
 
 const char *state_str[] = {
-  "UNDEF", "S", "V", "INIT"
+    "UNDEF", "S", "V", "INIT", "MAYBE_SILENCE"
 };
 
 const char *state2str(VAD_STATE st) {
@@ -56,6 +56,8 @@ VAD_DATA * vad_open(float rate) {
   vad_data->state = ST_INIT;
   vad_data->sampling_rate = rate;
   vad_data->frame_length = rate * FRAME_TIME * 1e-3;
+  vad_data->silence_count = 0;
+  vad_data->noise_power = -60.0f;
   return vad_data;
 }
 
@@ -64,6 +66,9 @@ VAD_STATE vad_close(VAD_DATA *vad_data) {
    * TODO: decide what to do with the last undecided frames
    */
   VAD_STATE state = vad_data->state;
+  if (state == ST_MAYBE_SILENCE) {
+    state = ST_VOICE;
+}
 
   free(vad_data);
   return state;
@@ -88,21 +93,46 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, float llindar) {
   Features f = compute_features(x, vad_data->frame_length);
   vad_data->last_feature = f.p; /* save feature, in case you want to show */
 
+  if (vad_data->state == ST_SILENCE &&
+    isfinite(f.p) &&
+    f.p < llindar) {
+
+    vad_data->noise_power =
+        0.95f * vad_data->noise_power + 0.05f * f.p;
+}
+float adaptive_threshold = vad_data->noise_power + 15.0f;
   switch (vad_data->state) {
   case ST_INIT:
     vad_data->state = ST_SILENCE;
-    vad_data->potencia_soroll = f.p;
     break;
 
   case ST_SILENCE:
-    if (f.p > vad_data->potencia_soroll+llindar)
-      vad_data->state = ST_VOICE;
+    if (f.p > adaptive_threshold)
+        vad_data->state = ST_VOICE;
     break;
 
-  case ST_VOICE:
-    if (f.p < vad_data->potencia_soroll+llindar)
-      vad_data->state = ST_SILENCE;
+
+case ST_VOICE:
+    if (f.p < llindar) {
+        vad_data->silence_count = 1;
+        vad_data->state = ST_MAYBE_SILENCE;
+    }
     break;
+
+case ST_MAYBE_SILENCE:
+    if (f.p < llindar) {
+        vad_data->silence_count++;
+
+        if (vad_data->silence_count >= 20) {
+            vad_data->state = ST_SILENCE;
+            vad_data->silence_count = 0;
+        }
+    } else {
+        vad_data->state = ST_VOICE;
+        vad_data->silence_count = 0;
+    }
+    break;
+
 
   case ST_UNDEF:
     break;

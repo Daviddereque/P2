@@ -13,7 +13,6 @@ float compute_power(const float *x, unsigned int N) {
     return 10 * log10(power);
 }
 
-
 float compute_am(const float *x, unsigned int N) {
     float am = 0.0;
 
@@ -23,7 +22,6 @@ float compute_am(const float *x, unsigned int N) {
 
     return am / N;
 }
-
 
 float compute_zcr(const float *x, unsigned int N, float fm) {
     unsigned int cruces = 0;

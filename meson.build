@@ -1,10 +1,11 @@
 
-project('PAV_P2', 'c')
+project('Práctica 2 de PAV - detección de actividad vocal', 'c')
 
-sndfile_dep = dependency('sndfile')
-math_dep = meson.get_compiler('c').find_library('m')
+exe = 'vad'
+src = ['src/main_vad.c', 'src/vad.c','src/pav_analysis.c']
 
-executable('vad',
-  ['src/main_vad.c', 'src/vad.c', 'src/pav_analysis.c'],
-  dependencies: [sndfile_dep, math_dep]
-)
+sndfile = dependency('sndfile', required: true)
+math = meson.get_compiler('c').find_library('m', required: false)
+
+executable(exe, sources: src, dependencies: [sndfile, math])
+
