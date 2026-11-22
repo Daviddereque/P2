@@ -264,7 +264,7 @@ Para realizar una primera prueba, hemos ejecutado:
 
 ```bash
 ./bin/vad -i audioP2_16k.wav -o prueba_ampliacion.vad -w audio_sin_silencios.wav -l -42
-
+```
 
 
 #### Gestión de las opciones del programa usando `docopt_c`
