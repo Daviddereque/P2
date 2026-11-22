@@ -37,7 +37,7 @@ const char help_message[] =
 "   -i FILE, --input-wav=FILE   WAVE file for voice activity detection\n"
 "   -o FILE, --output-vad=FILE  Label file with the result of VAD\n"
 "   -w FILE, --output-wav=FILE  WAVE file with silences cleared\n"
-"   -l REAL, --llindar=REAL     llindar de decisió veu i silenci [default: -40]\n"
+"   -l REAL, --llindar=REAL     llindar de decisió veu i silenci [default: -42]\n"
 "   -v, --verbose  Show debug information\n"
 "   -h, --help     Show this screen\n"
 "   --version      Show the version of the project\n"

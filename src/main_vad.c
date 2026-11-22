@@ -79,8 +79,10 @@ int main(int argc, char *argv[]) {
     if  ((n_read = sf_read_float(sndfile_in, buffer, frame_size)) != frame_size) break;
 
     if (sndfile_out != 0) {
-      /* TODO: copy all the samples into sndfile_out */
-    }
+      /* Copy original audio samples */
+          sf_write_float(sndfile_out, buffer, frame_size);
+
+        }
 
     state = vad(vad_data, buffer, llindar);
     if (verbose & DEBUG_VAD) vad_show_state(vad_data, stdout);
@@ -113,10 +115,13 @@ if (state == ST_UNDEF) {
 }
 
 
-    if (sndfile_out != 0) {
+    if (sndfile_out != 0 && state == ST_SILENCE) {
       /* TODO: go back and write zeros in silence segments */
+        sf_seek(sndfile_out, t * frame_size, SEEK_SET);
+        sf_write_float(sndfile_out, buffer_zeros, frame_size);
+        sf_seek(sndfile_out, 0, SEEK_END);
+      }
     }
-  }
 
   state = vad_close(vad_data);
   /* TODO: what do you want to print, for last frames? */

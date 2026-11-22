@@ -100,7 +100,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, float llindar) {
     vad_data->noise_power =
         0.95f * vad_data->noise_power + 0.05f * f.p;
 }
-float adaptive_threshold = vad_data->noise_power + 15.0f;
+float adaptive_threshold = vad_data->noise_power + 11.0f;
   switch (vad_data->state) {
   case ST_INIT:
     vad_data->state = ST_SILENCE;
